@@ -27,8 +27,6 @@
     --focus: #ffffff;
 
     /* Métricas */
-    /* Limitado por largura E altura: em telas baixas (mobile paisagem) encolhe pela altura. */
-    --board: min(86vw, 60vh, 440px);
     --gap: clamp(7px, 2.2vw, 13px);
 }
 
@@ -37,19 +35,6 @@ body {
     color: var(--text);
     background:
         radial-gradient(circle at 50% 16%, var(--bg-1), var(--bg-2) 72%);
-    /* 100dvh acompanha a barra de endereço no mobile; safe center centraliza
-       quando cabe, mas alinha ao topo (com scroll) quando o conteúdo é maior. */
-    min-height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: safe center;
-    /* Respeita o notch e encolhe a margem em telas pequenas. */
-    padding:
-        max(env(safe-area-inset-top), clamp(14px, 4vw, 24px))
-        max(env(safe-area-inset-right), clamp(14px, 4vw, 24px))
-        max(env(safe-area-inset-bottom), clamp(14px, 4vw, 24px))
-        max(env(safe-area-inset-left), clamp(14px, 4vw, 24px));
     -webkit-tap-highlight-color: transparent;
 }
 
@@ -68,12 +53,44 @@ body {
 }
 
 .game {
+    /* Ocupa pelo menos a tela inteira (100dvh acompanha a barra do navegador no
+       mobile). Como é min-height (não height), nunca fica menor que o conteúdo:
+       centraliza quando cabe e cresce + rola a partir do topo quando não cabe,
+       sem cortar nada. O tabuleiro (.board-area, flex:1) reivindica o que sobra. */
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: clamp(16px, 3vw, 28px);
+    justify-content: center;
+    gap: clamp(10px, 1.8vh, 26px);
     width: 100%;
-    max-width: 480px;
+    max-width: 500px;
+    margin-inline: auto;
+    /* Respeita o notch; padding entra no 100dvh via box-sizing: border-box. */
+    padding:
+        max(env(safe-area-inset-top), clamp(14px, 2.4vh, 24px))
+        max(env(safe-area-inset-right), clamp(14px, 4vw, 24px))
+        max(env(safe-area-inset-bottom), clamp(14px, 2.4vh, 24px))
+        max(env(safe-area-inset-left), clamp(14px, 4vw, 24px));
+}
+
+/* Área flexível que abriga o tabuleiro; absorve o espaço vertical restante.
+   O piso (min-height) garante um tabuleiro jogável: em telas muito baixas,
+   é melhor rolar um pouco do que encolher o board até ficar inútil. */
+.board-area {
+    flex: 1 1 auto;
+    min-height: min(86vw, 180px);
+    width: 100%;
+    display: grid;
+    place-items: center;
+}
+
+/* Telas muito baixas (celular em paisagem): o conteúdo não cabe mesmo com o
+   tabuleiro no mínimo. Alinha ao topo para nada ser cortado e permitir scroll. */
+@media (max-height: 500px) {
+    .game {
+        justify-content: flex-start;
+    }
 }
 
 /* ---------- Cabeçalho ---------- */
@@ -119,8 +136,14 @@ body {
 
 .board {
     position: relative;
-    width: var(--board);
-    height: var(--board);
+    /* A altura preenche a .board-area; a largura segue via aspect-ratio (quadrado).
+       max-height limita pela altura disponível e por 440px. Como a .board-area é
+       sempre mais larga que esse limite, a largura nunca é cortada → círculo perfeito. */
+    height: 100%;
+    width: auto;
+    aspect-ratio: 1 / 1;
+    max-height: min(86vw, 440px);
+    max-width: 100%;
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
