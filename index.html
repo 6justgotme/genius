@@ -1,33 +1,71 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Genius - jogo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description"
+        content="Genius — clássico jogo de memória. Memorize a sequência de cores e repita na ordem correta.">
+    <meta name="color-scheme" content="dark">
+    <title>Genius — jogo de memória</title>
+
     <link rel="stylesheet" href="reset.css">
     <link rel="stylesheet" href="style.css">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+        rel="stylesheet">
 </head>
 
 <body>
-    <div class="container">
-        <h1>genius</h1>
-        <div class="circuloPreto">
-            <div class="verde">
-            </div>
-            <div class="vermelho"></div>
-            <div class="azul"></div>
-            <div class="amarelo"></div>
-            <div class="circuloCentro">
-                <button id="start">Start Game</button>
-                <button id="reset">Restart Game</button>
+    <main class="game">
+        <header class="game__header">
+            <h1 class="game__title">genius</h1>
+            <p class="game__subtitle">Memorize a sequência de cores e repita na ordem certa.</p>
+        </header>
+
+        <div class="scoreboard">
+            <span>Recorde: <b data-highscore>0</b></span>
+        </div>
+
+        <div class="board board--locked" role="group" aria-label="Tabuleiro do jogo Genius">
+            <button class="pad pad--green" type="button" data-pad="0" aria-label="Verde" aria-keyshortcuts="1"></button>
+            <button class="pad pad--red" type="button" data-pad="1" aria-label="Vermelho" aria-keyshortcuts="2"></button>
+            <button class="pad pad--blue" type="button" data-pad="2" aria-label="Azul" aria-keyshortcuts="3"></button>
+            <button class="pad pad--yellow" type="button" data-pad="3" aria-label="Amarelo" aria-keyshortcuts="4"></button>
+
+            <div class="hub">
+                <span class="hub__label">Rodada</span>
+                <span class="hub__round" data-round>0</span>
             </div>
         </div>
-    </div>
+
+        <p class="status" role="status" aria-live="polite" data-status>
+            Pressione <b>Começar</b> para jogar.
+        </p>
+
+        <!-- Região só para leitor de tela: narra as cores da sequência durante a demonstração. -->
+        <p class="sr-only" aria-live="polite" data-narrate></p>
+
+        <div class="controls">
+            <button class="btn btn--primary" type="button" data-action="start">Começar</button>
+
+            <div class="toolbar">
+                <div class="segmented" role="group" aria-label="Dificuldade">
+                    <button type="button" data-difficulty="facil" aria-pressed="false">Fácil</button>
+                    <button type="button" data-difficulty="medio" aria-pressed="true">Médio</button>
+                    <button type="button" data-difficulty="dificil" aria-pressed="false">Difícil</button>
+                </div>
+
+                <button class="toggle" type="button" data-action="sound" aria-pressed="true">🔊 Som</button>
+            </div>
+
+            <p class="hint">Dica: jogue com o mouse ou com as teclas <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd>.</p>
+        </div>
+    </main>
+
     <script src="script.js"></script>
 </body>
 
