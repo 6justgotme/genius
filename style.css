@@ -1,183 +1,388 @@
+/* ============================================================
+   Genius — folha de estilo
+   Tema escuro, tabuleiro circular em grid 2x2 e brilho (glow)
+   nas cores ativas. Tudo dimensionado com clamp()/vw para ser
+   responsivo sem media queries espalhadas.
+   ============================================================ */
+
+:root {
+    /* Cores das pads (base e estado aceso) */
+    --green: #15a34a;
+    --green-active: #54f59a;
+    --red: #c62434;
+    --red-active: #ff6b6b;
+    --blue: #1f5fd1;
+    --blue-active: #5aa6ff;
+    --yellow: #d99a14;
+    --yellow-active: #ffd24d;
+
+    /* Superfícies e texto */
+    --ring: #07080c;
+    --bg-1: #16202c;
+    --bg-2: #07080d;
+    --surface: #11151c;
+    --surface-2: #2a3340;
+    --text: #e8edf2;
+    --muted: #8a97a6;
+    --focus: #ffffff;
+
+    /* Métricas */
+    /* Limitado por largura E altura: em telas baixas (mobile paisagem) encolhe pela altura. */
+    --board: min(86vw, 60vh, 440px);
+    --gap: clamp(7px, 2.2vw, 13px);
+}
+
 body {
-    font-family: 'Space Mono', monospace;
-}
-
-.container {
-    background-color: blanchedalmond;
+    font-family: 'Space Mono', ui-monospace, 'SF Mono', monospace;
+    color: var(--text);
+    background:
+        radial-gradient(circle at 50% 16%, var(--bg-1), var(--bg-2) 72%);
+    /* 100dvh acompanha a barra de endereço no mobile; safe center centraliza
+       quando cabe, mas alinha ao topo (com scroll) quando o conteúdo é maior. */
+    min-height: 100dvh;
     display: flex;
-    justify-content: center;
-    align-items: center;
     flex-direction: column;
-    width: 100vw;
-    height: 100vh;
+    align-items: center;
+    justify-content: safe center;
+    /* Respeita o notch e encolhe a margem em telas pequenas. */
+    padding:
+        max(env(safe-area-inset-top), clamp(14px, 4vw, 24px))
+        max(env(safe-area-inset-right), clamp(14px, 4vw, 24px))
+        max(env(safe-area-inset-bottom), clamp(14px, 4vw, 24px))
+        max(env(safe-area-inset-left), clamp(14px, 4vw, 24px));
+    -webkit-tap-highlight-color: transparent;
 }
 
-.container h1 {
-    font-weight: bold;
-    font-size: 60px;
-    margin-bottom: 40px;
+/* Conteúdo visível só para leitores de tela. */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
 }
 
-@media screen and (max-width: 400px) {
-  .container h1 {
-    font-size: 15vw;
-  }
-}
-.circuloPreto {
-    position: relative;
-    background-color: #0a0903;
-    width: 400px;
-    height: 400px;
+.game {
     display: flex;
-    flex-wrap: wrap;
-    border-radius: 200px;
-    border: 2px solid #0a0903;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(16px, 3vw, 28px);
+    width: 100%;
+    max-width: 480px;
 }
 
-@media screen and (max-width: 400px) {
-    .circuloPreto {
-        width: 100vw;
-        height: 100vw;
-        background-color: red;
+/* ---------- Cabeçalho ---------- */
+
+.game__header {
+    text-align: center;
+}
+
+.game__title {
+    font-size: clamp(38px, 12vw, 66px);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: lowercase;
+    background: linear-gradient(90deg,
+            var(--green-active), var(--blue-active),
+            var(--yellow-active), var(--red-active));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.game__subtitle {
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: clamp(12px, 3.2vw, 14px);
+    letter-spacing: 0.02em;
+}
+
+/* ---------- Placar ---------- */
+
+.scoreboard {
+    display: flex;
+    gap: 24px;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+.scoreboard b {
+    color: var(--text);
+}
+
+/* ---------- Tabuleiro ---------- */
+
+.board {
+    position: relative;
+    width: var(--board);
+    height: var(--board);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: var(--gap);
+    padding: var(--gap);
+    border-radius: 50%;
+    background: var(--ring);
+    box-shadow:
+        0 24px 60px rgba(0, 0, 0, 0.6),
+        inset 0 0 0 2px rgba(255, 255, 255, 0.04);
+}
+
+.board--error {
+    animation: shake 0.4s ease;
+}
+
+.pad {
+    border-radius: 16px;
+    opacity: 0.9;
+    transition: filter 0.12s ease, box-shadow 0.12s ease,
+        opacity 0.12s ease, transform 0.08s ease, background 0.12s ease;
+}
+
+.pad--green {
+    background: var(--green);
+    border-top-left-radius: 100%;
+    --glow: var(--green-active);
+}
+
+.pad--red {
+    background: var(--red);
+    border-top-right-radius: 100%;
+    --glow: var(--red-active);
+}
+
+.pad--blue {
+    background: var(--blue);
+    border-bottom-left-radius: 100%;
+    --glow: var(--blue-active);
+}
+
+.pad--yellow {
+    background: var(--yellow);
+    border-bottom-right-radius: 100%;
+    --glow: var(--yellow-active);
+}
+
+/* Hover só em dispositivos com mouse e com o tabuleiro liberado.
+   No mobile, evita que uma cor fique "presa" no estado hover após o toque. */
+@media (hover: hover) {
+    .board:not(.board--locked) .pad:hover {
+        opacity: 1;
+        filter: brightness(1.15);
     }
 }
 
-.circuloPreto div {
-    border: 8px solid #0a0903;
+.pad:active {
+    transform: scale(0.985);
 }
 
-.verde {
-    box-sizing: border-box;
-    background-color: #157f1f;
-    width: 200px;
-    height: 200px;
-    border-top-left-radius: 200px;
+/* Tabuleiro travado: bloqueia o ponteiro sem usar [disabled]
+   (que tiraria as pads da ordem de foco do teclado a cada rodada). */
+.board--locked .pad {
+    pointer-events: none;
+    cursor: default;
 }
 
-@media screen and (max-width: 400px) {
-    .verde {
-        width: 50vw;
-        height: 50vw;
-    }
+/* Estado aceso: cor viva + brilho */
+.pad--active {
+    opacity: 1;
+    box-shadow:
+        0 0 38px 6px var(--glow),
+        inset 0 0 30px rgba(255, 255, 255, 0.35);
 }
 
-.verde--active {
-    background-color: #78f785;
+.pad--green.pad--active {
+    background: var(--green-active);
 }
 
-.vermelho {
-    box-sizing: border-box;
-    background-color: #7a1010;
-    width: 200px;
-    height: 200px;
-    border-top-right-radius: 200px;
+.pad--red.pad--active {
+    background: var(--red-active);
 }
 
-@media screen and (max-width: 400px) {
-    .vermelho {
-        width: 50vw;
-        height: 50vw;
-    }
+.pad--blue.pad--active {
+    background: var(--blue-active);
 }
 
-.vermelho--active {
-    background-color: #fa3706;
+.pad--yellow.pad--active {
+    background: var(--yellow-active);
 }
 
-.azul {
-    box-sizing: border-box;
-    background-color: #1446a0;
-    width: 200px;
-    height: 200px;
-    border-bottom-left-radius: 200px;
-}
+/* ---------- Núcleo central (hub) ---------- */
 
-@media screen and (max-width: 400px) {
-    .azul {
-        width: 50vw;
-        height: 50vw;
-    }
-}
-
-.azul--active {
-    background-color: #427ce7;
-}
-
-.amarelo {
-    box-sizing: border-box;
-    background-color: #9c620a;
-    width: 200px;
-    height: 200px;
-    border-bottom-right-radius: 200px;
-}
-
-@media screen and (max-width: 400px) {
-    .amarelo {
-        width: 50vw;
-        height: 50vw;
-    }
-}
-
-.amarelo--active {
-    background-color: #ffaa2a;
-}
-
-.circuloCentro {
+.hub {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    box-sizing: border-box;
-    background-color: #0a0903;
-    width: 210px;
-    height: 210px;
-    border-radius: 210px;
+    width: 42%;
+    height: 42%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 35%, #20232b, #0b0c12);
+    box-shadow:
+        inset 0 0 0 2px rgba(255, 255, 255, 0.06),
+        0 10px 30px rgba(0, 0, 0, 0.55);
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 4px;
+    z-index: 2;
 }
 
-@media screen and (max-width: 400px) {
-    .circuloCentro {
-        width: 53vw;
-        height: 53vw;
+.hub__label {
+    font-size: clamp(9px, 2.4vw, 11px);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.hub__round {
+    font-size: clamp(30px, 9vw, 46px);
+    font-weight: 700;
+    line-height: 1;
+}
+
+/* ---------- Mensagem de status ---------- */
+
+.status {
+    min-height: 1.6em;
+    font-size: clamp(14px, 3.6vw, 16px);
+    text-align: center;
+}
+
+.status b {
+    font-weight: 700;
+}
+
+/* ---------- Controles ---------- */
+
+.controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+}
+
+.btn {
+    padding: 12px 30px;
+    border-radius: 999px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--text);
+    background: linear-gradient(180deg, #3a4150, #22262f);
+    box-shadow:
+        0 6px 18px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+@media (hover: hover) {
+    .btn:hover {
+        filter: brightness(1.15);
+        transform: translateY(-1px);
     }
 }
 
-.textosDeDentro {
-    color: antiquewhite;
+.btn--primary {
+    background: linear-gradient(180deg, #4d7cff, #2b50c9);
+}
+
+.toolbar {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.segmented {
+    display: inline-flex;
+    gap: 4px;
+    padding: 4px;
+    background: var(--surface);
+    border-radius: 999px;
+}
+
+.segmented button {
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    color: var(--muted);
+    transition: background 0.12s ease, color 0.12s ease;
+}
+
+.segmented button[aria-pressed="true"] {
+    background: var(--surface-2);
+    color: var(--text);
+}
+
+.toggle {
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 13px;
+    transition: color 0.12s ease;
+}
+
+.toggle[aria-pressed="true"] {
+    color: var(--text);
+}
+
+.hint {
+    font-size: 12px;
+    color: var(--muted);
     text-align: center;
-    align-self: center;
 }
 
-#start,
-#reset {
-    color: white;
-    width: 40%;
-    height: 4vh;
-    font-size: 11.5px;
-    font-weight: lighter;
-    border-radius: 10px;
-    background: linear-gradient(to right, rgb(39, 37, 37), rgb(38, 38, 77));
+.hint kbd {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 5px;
+    background: var(--surface);
+    border: 1px solid var(--surface-2);
+    font-size: 11px;
 }
 
-@media screen and (max-width: 400px) {
-  #start,
-  #reset {
-   font-size: 3vw; 
-  }
+/* ---------- Animações ---------- */
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    20% {
+        transform: translateX(-9px);
+    }
+
+    40% {
+        transform: translateX(9px);
+    }
+
+    60% {
+        transform: translateX(-6px);
+    }
+
+    80% {
+        transform: translateX(6px);
+    }
 }
 
-#start:hover {
-    transform: scale(1.2);
-    color: black;
-    background: white;
-    transition: 1s;
-}
+/* Respeita quem prefere menos movimento (acessibilidade) */
+@media (prefers-reduced-motion: reduce) {
 
-#reset:hover {
-    transform: scale(1.2);
-    color: black;
-    background: white;
-    transition: 1s;
+    *,
+    *::before,
+    *::after {
+        transition: none !important;
+        animation: none !important;
+    }
 }
